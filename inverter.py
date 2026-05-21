@@ -121,7 +121,7 @@ class DeyeInverter:
 
             # Battery
             if self.config.has_battery:
-                data["battery_voltage"] = self.read_register(183) / 100
+                data["battery_voltage"] = self.read_register(183) / 10
                 time.sleep(0.05)
                 raw_current = self.read_register(191)
                 data["battery_current"] = -to_signed(raw_current) / 100
@@ -133,7 +133,7 @@ class DeyeInverter:
 
                 data["battery_capacity"] = self.read_register(107)
                 time.sleep(0.05)
-                data["battery_nominal_voltage"] = self.read_register(236) / 100
+                data["battery_nominal_voltage"] = self.read_register(236) / 10
                 time.sleep(0.05)
                 data["battery_discharge_percent"] = self.read_register(237)
                 time.sleep(0.05)
@@ -524,7 +524,7 @@ class BatterySampler:
             return
 
         with self._lock:
-            if 46.0 <= voltage <= 58.0:
+            if 320.0 <= voltage <= 580.0:
                 self._buffer.append(voltage)
                 if len(self._buffer) > self.buffer_size:
                     self._buffer.pop(0)
