@@ -518,7 +518,7 @@ class BatterySampler:
                 raw_v = self.inverter.read_register(reg_voltage)
                 raw_soc = self.inverter.read_register(reg_soc)
                 self.inverter.disconnect()
-            voltage = raw_v / 100
+            voltage = raw_v / 10
         except Exception as e:
             logger.warning("BatterySampler: failed to read battery registers: %s", e)
             return
