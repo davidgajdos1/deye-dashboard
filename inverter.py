@@ -524,7 +524,7 @@ class BatterySampler:
             return
 
         with self._lock:
-            if 320.0 <= voltage <= 580.0:
+            if 120.0 <= voltage <= 580.0:
                 self._buffer.append(voltage)
                 if len(self._buffer) > self.buffer_size:
                     self._buffer.pop(0)
