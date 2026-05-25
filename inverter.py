@@ -123,7 +123,7 @@ class DeyeInverter:
             if self.config.has_battery:
                 data["battery_voltage"] = self.read_register(183) / 10
                 time.sleep(0.05)
-                raw_current = self.read_register(191)
+                raw_current = self.read_register(591)
                 data["battery_current"] = -to_signed(raw_current) / 100
                 time.sleep(0.05)
 
