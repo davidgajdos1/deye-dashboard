@@ -110,10 +110,10 @@ class DeyeInverter:
                 self.connect()
 
             # Solar PV
-            data["pv1_power"] = self.read_register(186)
+            data["pv1_power"] = self.read_register(672)
             time.sleep(0.05)
             if self.config.pv_strings >= 2:
-                data["pv2_power"] = self.read_register(187)
+                data["pv2_power"] = self.read_register(673)
                 time.sleep(0.05)
             else:
                 data["pv2_power"] = 0
