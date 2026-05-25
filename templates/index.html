@@ -3871,7 +3871,7 @@
                     if (!inverterConfig || inverterConfig.pv_strings >= 2) {
                         document.getElementById('pv2-power').textContent = data.pv2_power;
                     }
-                    document.getElementById('daily-pv').textContent = data.daily_pv.toFixed(1);
+                    document.getElementById('daily-pv').textContent = data.pv_daily_power;
 
                     // Battery
                     if (!inverterConfig || inverterConfig.has_battery !== false) {
