@@ -176,7 +176,7 @@ class DeyeInverter:
             # Load
             data["load_power"] = self.read_register(178)
             time.sleep(0.05)
-            data["load_l1"] = self.read_register(176)
+            data["load_l1"] = 0 if (v := self.read_register(176)) >= 65500 else v
             time.sleep(0.05)
 
             # Temperatures
@@ -312,11 +312,11 @@ class DeyeInverter:
 
             # Phase data (3-phase system)
             if self.config.phases == 3:
-                data["load_l1"] = self.read_register(650)
+                data["load_l1"] = 0 if (v := self.read_register(650)) >= 65500 else v
                 time.sleep(0.05)
-                data["load_l2"] = self.read_register(651)
+                data["load_l2"] = 0 if (v := self.read_register(651)) >= 65500 else v
                 time.sleep(0.05)
-                data["load_l3"] = self.read_register(652)
+                data["load_l3"] = 0 if (v := self.read_register(652)) >= 65500 else v
                 time.sleep(0.05)
 
                 data["voltage_l1"] = self.read_register(644) / 10
