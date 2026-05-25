@@ -242,8 +242,8 @@ class DeyeInverter:
             if self.config.has_battery:
                 data["battery_voltage"] = self.read_register(587) / 100
                 time.sleep(0.05)
-                raw_current = self.read_register(586)
-                data["battery_current"] = -to_signed(raw_current) / 100
+                raw_current = self.read_register(591)
+                data["battery_current"] = to_signed(raw_current) / 100
                 time.sleep(0.05)
 
                 # SOC from register 588 (BMS-reported, same as Solarman)
