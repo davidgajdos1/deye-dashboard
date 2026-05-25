@@ -122,6 +122,9 @@ class DeyeInverter:
             data["pv_daily_power"] = self.read_register(529)
             time.sleep(0.05)
 
+            data["load_daily_power"] = self.read_register(526)
+            time.sleep(0.05)
+
             # Battery
             if self.config.has_battery:
                 data["battery_voltage"] = self.read_register(183) / 10
@@ -242,6 +245,9 @@ class DeyeInverter:
             data["pv_total_power"] = data["pv1_power"] + data["pv2_power"]
             
             data["pv_daily_power"] = self.read_register(529)
+            time.sleep(0.05)
+
+            data["load_daily_power"] = self.read_register(526)
             time.sleep(0.05)
 
             # Battery
