@@ -62,7 +62,7 @@ def check_inverter(ip, serial):
     print(f"  [3/3] Reading registers ...", end=" ", flush=True)
     try:
         soc = modbus.read_holding_registers(588, 1)[0]
-        pv1 = modbus.read_holding_registers(514, 1)[0]
+        pv1 = modbus.read_holding_registers(672, 1)[0]
         grid_v = modbus.read_holding_registers(598, 1)[0] / 10
         load = modbus.read_holding_registers(653, 1)[0]
         modbus.disconnect()
