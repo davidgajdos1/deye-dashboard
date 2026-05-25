@@ -3893,7 +3893,7 @@
 
                     // Load
                     document.getElementById('load-power').innerHTML = data.load_power + '<span class="unit">W</span>';
-                    document.getElementById('daily-load').textContent = data.daily_load.toFixed(1);
+                    document.getElementById('daily-load').textContent = data.load_daily_power;
 
                     // Temperature
                     document.getElementById('dc-temp').textContent = data.dc_temp.toFixed(1) + '°C';
