@@ -188,11 +188,11 @@ class DeyeInverter:
             # Daily stats
             data["daily_pv"] = self.read_register(108) / 10
             time.sleep(0.05)
-            data["daily_grid_import"] = self.read_register(76) / 10
+            data["daily_grid_import"] = self.read_register(520)
             time.sleep(0.05)
-            data["daily_grid_export"] = self.read_register(77) / 10
+            data["daily_grid_export"] = self.read_register(529) / 10
             time.sleep(0.05)
-            data["daily_load"] = self.read_register(84) / 10
+            data["daily_load"] = self.read_register(526)
             time.sleep(0.05)
 
             # Generator (GEN/GRID2 port) — 1-phase Sunsynk uses register 166
@@ -301,13 +301,13 @@ class DeyeInverter:
             time.sleep(0.05)
 
             # Daily stats
-            data["daily_pv"] = self.read_register(502) / 10
+            data["daily_pv"] = self.read_register(529)
             time.sleep(0.05)
-            data["daily_grid_import"] = self.read_register(520) / 10
+            data["daily_grid_import"] = self.read_register(520)
             time.sleep(0.05)
-            data["daily_grid_export"] = self.read_register(521) / 10
+            data["daily_grid_export"] = self.read_register(521)
             time.sleep(0.05)
-            data["daily_load"] = self.read_register(526) / 10
+            data["daily_load"] = self.read_register(526)
             time.sleep(0.05)
 
             # Phase data (3-phase system)
