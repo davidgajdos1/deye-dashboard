@@ -90,6 +90,7 @@ class WeatherPoller:
 
 INVERTER_CACHE_FILE = os.environ.get("INVERTER_CACHE_FILE", "inverter_cache.json")
 INVERTER_CACHE_MAX_AGE = 300  # seconds – serve cached data if fresher than 5 min
+DAILY_ENERGY_LOG_FILE = os.environ.get("DAILY_ENERGY_LOG_FILE", "daily_energy_log.json")
 
 
 class InverterPoller:
@@ -161,6 +162,15 @@ class InverterPoller:
             # Record daily grid import for monthly totals
             if "daily_grid_import" in result:
                 record_grid_daily_import(result["daily_grid_import"])
+
+            # Record today's cumulative energy totals
+            if all(key in result for key in ("pv_daily_power", "daily_grid_import", "daily_grid_export", "load_daily_power")):
+                record_daily_energy_sample(
+                    result["pv_daily_power"],
+                    result["daily_grid_import"],
+                    result["daily_grid_export"],
+                    result["load_daily_power"],
+                )
 
             # Track generator runtime
             if inverter_config.has_generator and "generator_power" in result:
@@ -313,6 +323,40 @@ def save_grid_daily_log(log):
     """Save grid daily import log to file."""
     with open(GRID_DAILY_LOG_FILE, "w") as f:
         json.dump(log, f, indent=2)
+
+
+def load_daily_energy_log():
+    """Load daily energy log from file."""
+    if os.path.exists(DAILY_ENERGY_LOG_FILE):
+        with open(DAILY_ENERGY_LOG_FILE, "r") as f:
+            return json.load(f)
+    return {}
+
+
+def save_daily_energy_log(log):
+    """Save daily energy log to file."""
+    with open(DAILY_ENERGY_LOG_FILE, "w") as f:
+        json.dump(log, f, indent=2)
+
+
+def record_daily_energy_sample(generation_kwh, import_kwh, export_kwh, usage_kwh):
+    """Record today's cumulative energy totals and keep a rolling history."""
+    today = datetime.now().strftime("%Y-%m-%d")
+    log = load_daily_energy_log()
+    log[today] = {
+        "generation_kwh": float(generation_kwh),
+        "import_kwh": float(import_kwh),
+        "export_kwh": float(export_kwh),
+        "usage_kwh": float(usage_kwh),
+    }
+
+    # Keep only last 90 days
+    sorted_dates = sorted(log.keys(), reverse=True)
+    if len(sorted_dates) > 90:
+        for old_date in sorted_dates[90:]:
+            del log[old_date]
+
+    save_daily_energy_log(log)
 
 
 def record_grid_daily_import(daily_kwh):
@@ -565,6 +609,24 @@ def get_phase_stats():
     return jsonify(result)
 
 
+@app.route("/api/daily-energy-stats")
+def get_daily_energy_stats():
+    """Get daily energy totals for generation, import, export, and usage."""
+    log = load_daily_energy_log()
+
+    result = []
+    for day, data in sorted(log.items(), reverse=True)[:14]:
+        result.append({
+            "date": day,
+            "generation_kwh": round(data.get("generation_kwh", 0), 2),
+            "import_kwh": round(data.get("import_kwh", 0), 2),
+            "export_kwh": round(data.get("export_kwh", 0), 2),
+            "usage_kwh": round(data.get("usage_kwh", 0), 2),
+        })
+
+    return jsonify(result)
+
+
 @app.route("/api/phase-history")
 def get_phase_history():
     """Get phase time-series data for charting."""
@@ -590,6 +652,13 @@ def clear_phase_stats():
     """Clear phase statistics."""
     save_phase_stats({})
     save_phase_history({})
+    return jsonify({"status": "ok"})
+
+
+@app.route("/api/daily-energy-stats/clear", methods=["POST"])
+def clear_daily_energy_stats():
+    """Clear daily energy history."""
+    save_daily_energy_log({})
     return jsonify({"status": "ok"})
 
 

@@ -386,7 +386,7 @@
             opacity: 0.3;
             background: rgba(255, 255, 255, 0.1);
         }
-        
+
         .sortable-chosen {
             background: rgba(255, 255, 255, 0.15) !important;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
@@ -3041,6 +3041,31 @@
             </div>
         </div>
 
+        <!-- Daily Energy Analytics -->
+        <div class="card" id="daily-energy-card" data-id="daily-energy-card">
+            <div class="card-header">
+                <span class="icon">🗓️</span>
+                <h2>Daily Energy Log</h2>
+                <button class="btn" onclick="clearDailyEnergyStats()">Clear</button>
+            </div>
+            <div id="daily-energy-container">
+                <table class="phase-stats-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Generation</th>
+                            <th>Import</th>
+                            <th>Export</th>
+                            <th>Usage</th>
+                        </tr>
+                    </thead>
+                    <tbody id="daily-energy-body">
+                        <tr><td colspan="5" style="text-align:center; color:#64748b;">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- Outage History -->
         <div class="card" id="outage-history-card" data-id="outage-history-card">
             <div class="card-header">
@@ -3617,6 +3642,42 @@
             }
         }
 
+        async function loadDailyEnergyStats() {
+            try {
+                const response = await fetch('/api/daily-energy-stats');
+                const stats = await response.json();
+                renderDailyEnergyStats(stats);
+            } catch (e) {
+                console.error('Failed to load daily energy stats:', e);
+            }
+        }
+
+        function renderDailyEnergyStats(stats) {
+            const tbody = document.getElementById('daily-energy-body');
+
+            if (stats.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#64748b;">No data yet. Keep the dashboard running to collect data.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = stats.map(day => `
+                <tr>
+                    <td>${day.date}</td>
+                    <td><strong>${day.generation_kwh}</strong> kWh</td>
+                    <td><strong>${day.import_kwh}</strong> kWh</td>
+                    <td><strong>${day.export_kwh}</strong> kWh</td>
+                    <td><strong>${day.usage_kwh}</strong> kWh</td>
+                </tr>
+            `).join('');
+        }
+
+        async function clearDailyEnergyStats() {
+            if (confirm('Clear all daily energy history?')) {
+                await fetch('/api/daily-energy-stats/clear', { method: 'POST' });
+                loadDailyEnergyStats();
+            }
+        }
+
         function updatePhaseDisplay(data) {
             if (!data.load_l1) return;
 
@@ -4011,6 +4072,7 @@
         // Initial load
         loadOutageHistory();
         loadPhaseStats();
+        loadDailyEnergyStats();
         updateDashboard();
 
         // Fetch weather background immediately (independent of inverter data)
@@ -4021,6 +4083,9 @@
 
         // Refresh phase stats every 30 seconds
         setInterval(loadPhaseStats, 30000);
+
+        // Refresh daily energy log every 30 seconds
+        setInterval(loadDailyEnergyStats, 30000);
 
         // ===== OUTAGE SCHEDULE =====
         var latestInverterData = null;

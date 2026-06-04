@@ -47,6 +47,50 @@ class TestRecordGridDailyImport:
         assert len(log) <= 90
 
 
+class TestRecordDailyEnergySample:
+    def test_creates_new_log(self, tmp_path):
+        log_file = str(tmp_path / "daily_energy_log.json")
+        with patch("app.DAILY_ENERGY_LOG_FILE", log_file):
+            from app import record_daily_energy_sample
+            record_daily_energy_sample(12.5, 3.2, 1.1, 8.4)
+        with open(log_file) as f:
+            log = json.load(f)
+        today = datetime.now().strftime("%Y-%m-%d")
+        assert log[today]["generation_kwh"] == 12.5
+        assert log[today]["import_kwh"] == 3.2
+        assert log[today]["export_kwh"] == 1.1
+        assert log[today]["usage_kwh"] == 8.4
+
+    def test_overwrites_same_day(self, tmp_path):
+        log_file = str(tmp_path / "daily_energy_log.json")
+        today = datetime.now().strftime("%Y-%m-%d")
+        with open(log_file, "w") as f:
+            json.dump({today: {"generation_kwh": 1, "import_kwh": 2, "export_kwh": 3, "usage_kwh": 4}}, f)
+        with patch("app.DAILY_ENERGY_LOG_FILE", log_file):
+            from app import record_daily_energy_sample
+            record_daily_energy_sample(9.9, 8.8, 7.7, 6.6)
+        with open(log_file) as f:
+            log = json.load(f)
+        assert log[today]["generation_kwh"] == 9.9
+        assert log[today]["usage_kwh"] == 6.6
+
+    def test_90_day_rotation(self, tmp_path):
+        log_file = str(tmp_path / "daily_energy_log.json")
+        base = datetime.now()
+        old_log = {}
+        for i in range(95):
+            day = (base - timedelta(days=i)).strftime("%Y-%m-%d")
+            old_log[day] = {"generation_kwh": float(i), "import_kwh": float(i), "export_kwh": float(i), "usage_kwh": float(i)}
+        with open(log_file, "w") as f:
+            json.dump(old_log, f)
+        with patch("app.DAILY_ENERGY_LOG_FILE", log_file):
+            from app import record_daily_energy_sample
+            record_daily_energy_sample(1.0, 2.0, 3.0, 4.0)
+        with open(log_file) as f:
+            log = json.load(f)
+        assert len(log) <= 90
+
+
 class TestTrackGeneratorRuntime:
     def _reset_globals(self):
         """Reset global state before each test."""

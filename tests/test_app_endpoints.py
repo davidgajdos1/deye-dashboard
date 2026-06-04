@@ -103,6 +103,28 @@ class TestGetPhaseStats:
         assert entry["l3_pct"] == 0
 
 
+class TestGetDailyEnergyStats:
+    def test_returns_formatted_rows(self, client):
+        c, _, app_module = client
+        log = {
+            "2025-01-15": {
+                "generation_kwh": 12.345,
+                "import_kwh": 3.21,
+                "export_kwh": 1.11,
+                "usage_kwh": 8.88,
+            }
+        }
+        with patch.object(app_module, "load_daily_energy_log", return_value=log):
+            resp = c.get("/api/daily-energy-stats")
+        data = resp.get_json()
+        assert len(data) == 1
+        entry = data[0]
+        assert entry["generation_kwh"] == pytest.approx(12.35, abs=0.01)
+        assert entry["import_kwh"] == pytest.approx(3.21, abs=0.01)
+        assert entry["export_kwh"] == pytest.approx(1.11, abs=0.01)
+        assert entry["usage_kwh"] == pytest.approx(8.88, abs=0.01)
+
+
 class TestGetOutageSchedule:
     def test_disabled_returns_disabled(self, client):
         c, _, app_module = client
@@ -213,11 +235,15 @@ class TestClearEndpoints:
         c, _, app_module = client
         with patch.object(app_module, "save_outage_history") as mock_outage, \
              patch.object(app_module, "save_phase_stats") as mock_phase, \
-             patch.object(app_module, "save_phase_history") as mock_hist:
+             patch.object(app_module, "save_phase_history") as mock_hist, \
+             patch.object(app_module, "save_daily_energy_log") as mock_daily:
             resp1 = c.post("/api/outages/clear")
             resp2 = c.post("/api/phase-stats/clear")
+            resp3 = c.post("/api/daily-energy-stats/clear")
         assert resp1.status_code == 200
         assert resp2.status_code == 200
+        assert resp3.status_code == 200
         mock_outage.assert_called_once_with([])
         mock_phase.assert_called_once_with({})
         mock_hist.assert_called_once_with({})
+        mock_daily.assert_called_once_with({})
