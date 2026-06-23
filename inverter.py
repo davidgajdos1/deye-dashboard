@@ -286,8 +286,9 @@ class DeyeInverter:
             # Grid
             data["grid_voltage"] = self.read_register(598) / 10
             time.sleep(0.05)
-            raw_grid_power = self.read_register(607)
-            data["grid_power"] = to_signed(raw_grid_power)
+            #raw_grid_power = self.read_register(607)
+            #data["grid_power"] = to_signed(raw_grid_power)
+            data["grid_power"] = to_signed((self.read_register(690) << 16) | self.read_register(625))
             time.sleep(0.05)
 
             # Load
