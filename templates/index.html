@@ -1146,6 +1146,19 @@
             .temp-value {
                 font-size: 1.4rem;
             }
+            
+            .scrollable-table {
+                max-height: 400px;
+                overflow-y: auto;
+                overflow-x: auto;
+            }
+            
+            .scrollable-table thead th {
+                position: sticky;
+                top: 0;
+                background: var(--card-bg);
+                z-index: 10;
+            }
         }
 
         /* Fullscreen focus view - using class for cross-browser reliability */
@@ -3023,7 +3036,7 @@
                 <h2>Daily Phase Analytics</h2>
                 <button class="btn" onclick="clearPhaseStats()">Clear</button>
             </div>
-            <div id="phase-stats-container">
+            <div id="phase-stats-container" class="scrollable-table">
                 <table class="phase-stats-table">
                     <thead>
                         <tr>
@@ -3048,7 +3061,7 @@
                 <h2>Daily Energy Log</h2>
                 <button class="btn" onclick="clearDailyEnergyStats()">Clear</button>
             </div>
-            <div id="daily-energy-container">
+            <div id="daily-energy-container" class="scrollable-table">
                 <table class="phase-stats-table">
                     <thead>
                         <tr>
